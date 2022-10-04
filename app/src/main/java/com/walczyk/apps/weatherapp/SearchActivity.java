@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -62,42 +63,47 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     public void getWeatherData(String name){
-        Call<OpenWeatherMap> callForWeather = weatherAPI.getWeatherWithName(name);
-        callForWeather.enqueue(new Callback<OpenWeatherMap>() {
-            @Override
-            public void onResponse(Call<OpenWeatherMap> call, Response<OpenWeatherMap> response) {
-                OpenWeatherMap weatherMap = response.body();
-                Weather weather = weatherMap.getWeather().get(0);
-                TextView description = findViewById(R.id.description);
-                description.setText(weather.getDescription());
-                ImageView image = findViewById(R.id.image);
-                String iconUrl = "http://openweathermap.org/img/w/" + weather.getIcon() + ".png";
-                Picasso.get().load(iconUrl).into(image);
-                Main main = weatherMap.getMain();
-                TextView temp = findViewById(R.id.temp);
-                temp.setText(main.getTemp().toString() + " °C");
-                TextView maxTemp = findViewById(R.id.max_temp);
-                maxTemp.setText(": " + main.getTempMax().toString() + " °C");
-                TextView minTemp = findViewById(R.id.min_temp);
-                minTemp.setText(": " + main.getTempMin().toString() + " °C");
-                TextView pressure = findViewById(R.id.pressure);
-                pressure.setText(": " + main.getPressure().toString());
-                TextView humidity = findViewById(R.id.humidity);
-                humidity.setText(": " + main.getHumidity().toString() + "%");
-                TextView windSpeed = findViewById(R.id.wind_speed);
-                windSpeed.setText(": " + weatherMap.getWind().getSpeed().toString());
-                TextView location = findViewById(R.id.location);
-                String name = weatherMap.getName();
-                String country = weatherMap.getSys().getCountry();
-                String locationText = name + ", " + country;
-                location.setText(locationText);
-            }
+            Call<OpenWeatherMap> callForWeather = weatherAPI.getWeatherWithName(name);
+            callForWeather.enqueue(new Callback<OpenWeatherMap>() {
+                @Override
+                public void onResponse(Call<OpenWeatherMap> call, Response<OpenWeatherMap> response) {
+                    try {
+                        OpenWeatherMap weatherMap = response.body();
+                        Weather weather = weatherMap.getWeather().get(0);
+                        TextView description = findViewById(R.id.description);
+                        description.setText(weather.getDescription());
+                        ImageView image = findViewById(R.id.image);
+                        String iconUrl = "http://openweathermap.org/img/w/" + weather.getIcon() + ".png";
+                        Picasso.get().load(iconUrl).into(image);
+                        Main main = weatherMap.getMain();
+                        TextView temp = findViewById(R.id.temp);
+                        temp.setText(main.getTemp().toString() + " °C");
+                        TextView maxTemp = findViewById(R.id.max_temp);
+                        maxTemp.setText(": " + main.getTempMax().toString() + " °C");
+                        TextView minTemp = findViewById(R.id.min_temp);
+                        minTemp.setText(": " + main.getTempMin().toString() + " °C");
+                        TextView pressure = findViewById(R.id.pressure);
+                        pressure.setText(": " + main.getPressure().toString());
+                        TextView humidity = findViewById(R.id.humidity);
+                        humidity.setText(": " + main.getHumidity().toString() + "%");
+                        TextView windSpeed = findViewById(R.id.wind_speed);
+                        windSpeed.setText(": " + weatherMap.getWind().getSpeed().toString());
+                        TextView location = findViewById(R.id.location);
+                        String name = weatherMap.getName();
+                        String country = weatherMap.getSys().getCountry();
+                        String locationText = name + ", " + country;
+                        location.setText(locationText);
+                    }
+                    catch(Exception e){
 
-            @Override
-            public void onFailure(Call<OpenWeatherMap> call, Throwable t) {
+                        Toast.makeText(SearchActivity.this, "City not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
 
-            }
-        });
+                @Override
+                public void onFailure(Call<OpenWeatherMap> call, Throwable t) {
+                }
+            });
     }
 
     @Override
