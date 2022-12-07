@@ -3,33 +3,23 @@ package com.walczyk.apps.weatherapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SearchView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-
-import java.io.InputStream;
-import java.net.URL;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,6 +27,8 @@ import retrofit2.Response;
 
 public class SearchActivity extends AppCompatActivity {
     WeatherAPI weatherAPI;
+    String currentLocation = "London";
+    ImageView favoriteView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,22 +40,47 @@ public class SearchActivity extends AppCompatActivity {
 
         weatherAPI = RetrofitWeather.getClient().create(WeatherAPI.class);
 
-        ImageView search = findViewById(R.id.search_btn);
-        search.setOnClickListener(new View.OnClickListener() {
+        EditText searchEdit = findViewById(R.id.search_name);
+        searchEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View view) {
-                EditText searchName = findViewById(R.id.search_name);
-                getWeatherData(searchName.getText().toString());
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(searchName.getWindowToken(), 0);
+            public void onFocusChange(View v, boolean hasFocus) {
+                LinearLayout searchBorder = findViewById(R.id.search_border);
+                if(hasFocus) {
+                    searchBorder.setBackgroundResource(R.drawable.white_full);
+                    ((EditText)findViewById(R.id.search_name)).setTextColor(getResources().getColor(R.color.light_blue));
+                }else {
+                    searchBorder.setBackgroundResource(R.drawable.white_border);
+                    ((EditText)findViewById(R.id.search_name)).setTextColor(getResources().getColor(R.color.white));
+                }
             }
         });
 
-        getWeatherData("London");
+        ImageView search = findViewById(R.id.search_btn);
+        search.setOnClickListener(view -> {
+            EditText searchName = findViewById(R.id.search_name);
+            getWeatherData(searchName.getText().toString());
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchName.getWindowToken(), 0);
+            searchEdit.clearFocus();
+        });
+
+        favoriteView = findViewById(R.id.fav_view);
+        favoriteView.setOnClickListener(v -> {
+            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            String defaultLocation = sharedPref.getString("defaultWeatherLocation", "London");
+            if(!currentLocation.equals(defaultLocation)){
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("defaultWeatherLocation", currentLocation);
+                editor.apply();
+                favoriteView.setImageResource(R.drawable.ic_favorite);
+            }
+        });
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        getWeatherData(sharedPref.getString("defaultWeatherLocation", "London"));
     }
 
-    public void getWeatherData(String name){
-            Call<OpenWeatherMap> callForWeather = weatherAPI.getWeatherWithName(name);
+    public void getWeatherData(String searchText){
+            Call<OpenWeatherMap> callForWeather = weatherAPI.getWeatherWithName(searchText);
             callForWeather.enqueue(new Callback<OpenWeatherMap>() {
                 @Override
                 public void onResponse(Call<OpenWeatherMap> call, Response<OpenWeatherMap> response) {
@@ -77,7 +94,10 @@ public class SearchActivity extends AppCompatActivity {
                         Picasso.get().load(iconUrl).into(image);
                         Main main = weatherMap.getMain();
                         TextView temp = findViewById(R.id.temp);
-                        temp.setText(main.getTemp().toString() + " °C");
+                        String tempValue = main.getTemp().toString();
+                        temp.setText(tempValue + " °C");
+                        float tempIndex = (float)(Float.parseFloat(tempValue) + 20.0) / (float) 70;
+                        temp.setTextColor(Color.rgb(tempIndex, 0, 1 - tempIndex));
                         TextView maxTemp = findViewById(R.id.max_temp);
                         maxTemp.setText(": " + main.getTempMax().toString() + " °C");
                         TextView minTemp = findViewById(R.id.min_temp);
@@ -89,13 +109,20 @@ public class SearchActivity extends AppCompatActivity {
                         TextView windSpeed = findViewById(R.id.wind_speed);
                         windSpeed.setText(": " + weatherMap.getWind().getSpeed().toString());
                         TextView location = findViewById(R.id.location);
-                        String name = weatherMap.getName();
+                        currentLocation = weatherMap.getName();
                         String country = weatherMap.getSys().getCountry();
-                        String locationText = name + ", " + country;
+                        String locationText = currentLocation + ", " + country;
                         location.setText(locationText);
+
+                        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                        String defaultLocation = sharedPref.getString("defaultWeatherLocation", "London");
+                        if(currentLocation.equals(defaultLocation))
+                            favoriteView.setImageResource(R.drawable.ic_favorite);
+                        else
+                            favoriteView.setImageResource(R.drawable.ic_favorite_border);
                     }
                     catch(Exception e){
-
+                        favoriteView.setImageResource(R.drawable.ic_favorite_border);
                         Toast.makeText(SearchActivity.this, "City not found", Toast.LENGTH_SHORT).show();
                     }
                 }
