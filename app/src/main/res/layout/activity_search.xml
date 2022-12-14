@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SearchActivity"
     android:orientation="vertical"
-    android:background="@color/light_blue">
+    android:background="@color/light_blue"
+    android:onClick="clearEditTextFocus">
     <LinearLayout
+        android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2.5"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        android:onClick="clearEditTextFocus">
         <LinearLayout
             android:id="@+id/search_border"
             android:background="@drawable/white_border"
@@ -28,11 +30,12 @@
                 android:src="@drawable/ic_city"
                 android:layout_margin="15sp"/>
             <EditText
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:hint="Enter the city name"
                 android:id="@+id/search_name"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:focusableInTouchMode="true"
                 android:background="@null"/>
         </LinearLayout>
         <ImageView
@@ -51,22 +54,26 @@
         android:textColor="@color/white"
         android:textAlignment="center"
         android:textSize="30sp"
+        android:onClick="clearEditTextFocus"
         />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="2.3"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:onClick="clearEditTextFocus">
         <ImageView
             android:id="@+id/image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="2"/>
+            android:layout_weight="2"
+            android:onClick="clearEditTextFocus"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:onClick="clearEditTextFocus">
             <TextView
                 android:gravity="center"
                 android:textAlignment="center"
@@ -75,7 +82,8 @@
                 android:id="@+id/temp"
                 android:layout_weight="1"
                 android:textColor="@color/white"
-                android:textSize="50sp"/>
+                android:textSize="50sp"
+                android:onClick="clearEditTextFocus"/>
             <TextView
                 android:gravity="center"
                 android:textAlignment="center"
@@ -84,14 +92,16 @@
                 android:id="@+id/description"
                 android:layout_weight="1.8"
                 android:textColor="@color/white"
-                android:textSize="30sp"/>
+                android:textSize="30sp"
+                android:onClick="clearEditTextFocus"/>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1.2"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:onClick="clearEditTextFocus">
         <TextView
             android:textAlignment="center"
             android:text="Details: "
@@ -99,17 +109,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:paddingLeft="10dp"/>
+            android:paddingLeft="10dp"
+            android:onClick="clearEditTextFocus"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_weight="1"
-            android:layout_margin="10dp">
+            android:layout_margin="10dp"
+            android:onClick="clearEditTextFocus">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:onClick="clearEditTextFocus">
                 <TextView
                     android:text="Humidity"
                     android:textAlignment="center"
@@ -118,7 +131,8 @@
                     android:layout_weight="1"
                     android:textColor="@color/black"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
                 <TextView
                     android:text=":"
                     android:id="@+id/humidity"
@@ -127,12 +141,14 @@
                     android:layout_weight="1"
                     android:textColor="@color/white"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:onClick="clearEditTextFocus">
                 <TextView
                     android:text="Max. Temp"
                     android:textAlignment="center"
@@ -141,7 +157,8 @@
                     android:layout_weight="1"
                     android:textColor="@color/black"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
                 <TextView
                     android:text=":"
                     android:id="@+id/max_temp"
@@ -150,12 +167,14 @@
                     android:layout_weight="1"
                     android:textColor="@color/white"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:onClick="clearEditTextFocus">
                 <TextView
                     android:text="Min. Temp"
                     android:textAlignment="center"
@@ -164,7 +183,8 @@
                     android:layout_weight="1"
                     android:textColor="@color/black"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
                 <TextView
                     android:text=":"
                     android:id="@+id/min_temp"
@@ -173,12 +193,14 @@
                     android:layout_weight="1"
                     android:textColor="@color/white"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:onClick="clearEditTextFocus">
                 <TextView
                     android:text="Pressure"
                     android:textAlignment="center"
@@ -187,7 +209,8 @@
                     android:layout_weight="1"
                     android:textColor="@color/black"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
                 <TextView
                     android:text=":"
                     android:id="@+id/pressure"
@@ -196,12 +219,14 @@
                     android:layout_weight="1"
                     android:textColor="@color/white"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:onClick="clearEditTextFocus">
                 <TextView
                     android:text="Wind speed"
                     android:textAlignment="center"
@@ -210,7 +235,8 @@
                     android:layout_weight="1"
                     android:textColor="@color/black"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
                 <TextView
                     android:text=":"
                     android:id="@+id/wind_speed"
@@ -219,7 +245,8 @@
                     android:layout_weight="1"
                     android:textColor="@color/white"
                     android:padding="1dp"
-                    android:textSize="25sp"/>
+                    android:textSize="25sp"
+                    android:onClick="clearEditTextFocus"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -227,7 +254,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
-        android:layout_weight="0.07">
+        android:layout_weight="0.07"
+        android:onClick="clearEditTextFocus">
         <ImageView
             android:background="@drawable/circle"
             android:src="@drawable/ic_favorite_border"

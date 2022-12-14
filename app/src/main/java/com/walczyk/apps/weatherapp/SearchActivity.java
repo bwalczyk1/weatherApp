@@ -4,12 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +31,15 @@ public class SearchActivity extends AppCompatActivity {
     ImageView favoriteView;
 
     @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(R.layout.activity_search);
+        prepareLayout();
+        getWeatherData(currentLocation);
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
@@ -40,27 +49,54 @@ public class SearchActivity extends AppCompatActivity {
 
         weatherAPI = RetrofitWeather.getClient().create(WeatherAPI.class);
 
+        prepareLayout();
+
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        getWeatherData(sharedPref.getString("defaultWeatherLocation", currentLocation));
+    }
+
+    public void clearEditTextFocus(View v){
+        hideSoftKeyboard(this);
         EditText searchEdit = findViewById(R.id.search_name);
-        searchEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                LinearLayout searchBorder = findViewById(R.id.search_border);
-                if(hasFocus) {
-                    searchBorder.setBackgroundResource(R.drawable.white_full);
-                    ((EditText)findViewById(R.id.search_name)).setTextColor(getResources().getColor(R.color.light_blue));
-                }else {
-                    searchBorder.setBackgroundResource(R.drawable.white_border);
-                    ((EditText)findViewById(R.id.search_name)).setTextColor(getResources().getColor(R.color.white));
-                }
+        searchEdit.clearFocus();
+    }
+
+    public static void hideSoftKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) activity.getSystemService(
+                        Activity.INPUT_METHOD_SERVICE);
+        if(inputMethodManager.isAcceptingText() && activity.getCurrentFocus() != null){
+            inputMethodManager.hideSoftInputFromWindow(
+                    activity.getCurrentFocus().getWindowToken(),
+                    0
+            );
+        }
+    }
+
+    public void prepareLayout(){
+        EditText searchEdit = findViewById(R.id.search_name);
+        searchEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            LinearLayout searchBorder = findViewById(R.id.search_border);
+            if(searchBorder == null)
+                return;
+            if(hasFocus) {
+                searchBorder.setBackgroundResource(R.drawable.white_full);
+                ((EditText)findViewById(R.id.search_name)).setTextColor(getColor(R.color.light_blue));
+                ((EditText)findViewById(R.id.search_name)).setHintTextColor(getColor(R.color.light_blue));
+                ((ImageView)findViewById(R.id.city_image)).setColorFilter(getColor(R.color.light_blue));
+            }else {
+                searchBorder.setBackgroundResource(R.drawable.white_border);
+                ((EditText)findViewById(R.id.search_name)).setTextColor(getColor(R.color.white));
+                ((EditText)findViewById(R.id.search_name)).setHintTextColor(getColor(R.color.white));
+                ((ImageView)findViewById(R.id.city_image)).setColorFilter(getColor(R.color.white));
             }
         });
 
         ImageView search = findViewById(R.id.search_btn);
         search.setOnClickListener(view -> {
-            EditText searchName = findViewById(R.id.search_name);
-            getWeatherData(searchName.getText().toString());
+            getWeatherData(searchEdit.getText().toString());
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(searchName.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(searchEdit.getWindowToken(), 0);
             searchEdit.clearFocus();
         });
 
@@ -75,15 +111,13 @@ public class SearchActivity extends AppCompatActivity {
                 favoriteView.setImageResource(R.drawable.ic_favorite);
             }
         });
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-        getWeatherData(sharedPref.getString("defaultWeatherLocation", "London"));
     }
 
     public void getWeatherData(String searchText){
             Call<OpenWeatherMap> callForWeather = weatherAPI.getWeatherWithName(searchText);
             callForWeather.enqueue(new Callback<OpenWeatherMap>() {
                 @Override
-                public void onResponse(Call<OpenWeatherMap> call, Response<OpenWeatherMap> response) {
+                public void onResponse(@NonNull Call<OpenWeatherMap> call, @NonNull Response<OpenWeatherMap> response) {
                     try {
                         OpenWeatherMap weatherMap = response.body();
                         Weather weather = weatherMap.getWeather().get(0);
@@ -96,7 +130,7 @@ public class SearchActivity extends AppCompatActivity {
                         TextView temp = findViewById(R.id.temp);
                         String tempValue = main.getTemp().toString();
                         temp.setText(tempValue + " °C");
-                        float tempIndex = (float)(Float.parseFloat(tempValue) + 20.0) / (float) 70;
+                        float tempIndex = (float)(Float.parseFloat(tempValue) + 50.0) / (float) 100;
                         temp.setTextColor(Color.rgb(tempIndex, 0, 1 - tempIndex));
                         TextView maxTemp = findViewById(R.id.max_temp);
                         maxTemp.setText(": " + main.getTempMax().toString() + " °C");
@@ -128,7 +162,7 @@ public class SearchActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<OpenWeatherMap> call, Throwable t) {
+                public void onFailure(@NonNull Call<OpenWeatherMap> call, @NonNull Throwable t) {
                 }
             });
     }

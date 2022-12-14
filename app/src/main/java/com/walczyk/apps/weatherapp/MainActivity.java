@@ -10,6 +10,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -38,6 +39,19 @@ public class MainActivity extends AppCompatActivity {
     WeatherAPI weatherAPI;
     LocationManager locationManager;
     LocationListener locationListener;
+    String currentLocation = "";
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(R.layout.activity_main);TextView addBtn = findViewById(R.id.add_btn);
+        addBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            startActivity(intent);
+        });
+        if (!currentLocation.equals(""))
+            getWeatherData(100, 200);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,12 +82,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         TextView addBtn = findViewById(R.id.add_btn);
-        addBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-                startActivity(intent);
-            }
+        addBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -83,10 +94,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getWeatherData(double lat, double lon){
-        Call<OpenWeatherMap> callForWeather = weatherAPI.getWeatherWithLocation(lat, lon);
+        Call<OpenWeatherMap> callForWeather;
+        if(lat == 100 && lon == 200)
+            callForWeather = weatherAPI.getWeatherWithName(currentLocation);
+        else
+            callForWeather = weatherAPI.getWeatherWithLocation(lat, lon);
         callForWeather.enqueue(new Callback<OpenWeatherMap>() {
             @Override
-            public void onResponse(Call<OpenWeatherMap> call, Response<OpenWeatherMap> response) {
+            public void onResponse(@NonNull Call<OpenWeatherMap> call,@NonNull Response<OpenWeatherMap> response) {
                 OpenWeatherMap weatherMap = response.body();
                 Weather weather = weatherMap.getWeather().get(0);
                 TextView description = findViewById(R.id.description);
@@ -98,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 TextView temp = findViewById(R.id.temp);
                 String tempValue = main.getTemp().toString();
                 temp.setText(tempValue + " °C");
-                float tempIndex = (float)(Float.parseFloat(tempValue) + 20.0) / (float) 70;
+                float tempIndex = (float)(Float.parseFloat(tempValue) + 50.0) / (float) 100;
                 temp.setTextColor(Color.rgb(tempIndex, 0, 1 - tempIndex));
                 TextView maxTemp = findViewById(R.id.max_temp);
                 maxTemp.setText(": " + main.getTempMax().toString() + " °C");
@@ -111,14 +126,14 @@ public class MainActivity extends AppCompatActivity {
                 TextView windSpeed = findViewById(R.id.wind_speed);
                 windSpeed.setText(": " + weatherMap.getWind().getSpeed().toString());
                 TextView location = findViewById(R.id.location);
-                String name = weatherMap.getName();
+                currentLocation = weatherMap.getName();
                 String country = weatherMap.getSys().getCountry();
-                String locationText = name + ", " + country;
+                String locationText = currentLocation + ", " + country;
                 location.setText(locationText);
             }
 
             @Override
-            public void onFailure(Call<OpenWeatherMap> call, Throwable t) {
+            public void onFailure(@NonNull Call<OpenWeatherMap> call, @NonNull Throwable t) {
 
             }
         });
